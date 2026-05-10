@@ -1,0 +1,75 @@
+{
+  "matrix_version": "0.4-draft",
+  "last_updated": "2025-03-14",
+  "activity_groups": {
+    "Strategy": [
+      {
+        "activity": "Develop customer-oriented strategy",
+        "responsible": "Strategic Process Owner - Market & Customer Dev",
+        "accountable": "COO",
+        "consult": "Head of Sales",
+        "inform": "All Process Owners"
+      },
+      {
+        "activity": "Link process goals to strategy",
+        "responsible": "Operations Excellence Office",
+        "accountable": "COO",
+        "consult": "Strategic Process Owners",
+        "inform": "All Process Owners"
+      },
+      {
+        "activity": "Periodic governance matrix review",
+        "responsible": null,
+        "accountable": "COO",
+        "consult": "BPM Team",
+        "inform": "Strategic Process Owners"
+      }
+    ],
+    "Process": [
+      {
+        "activity": "Ensure cross-functional communication and customer experience",
+        "responsible": "Strategic Process Owner - Fulfillment",
+        "accountable": "Strategic Process Owner - Fulfillment",
+        "consult": "Head of Quality Management",
+        "inform": "Customer Success Partners"
+      },
+      {
+        "activity": "Customer onboarding handover",
+        "responsible": "Strategic Process Owner - Market & Customer Dev",
+        "accountable": "Strategic Process Owner - Fulfillment",
+        "consult": "Customer Success Partner",
+        "inform": "Sales"
+      },
+      {
+        "activity": "End-to-end value optimization",
+        "responsible": "Strategic Process Owner - Value Optimization",
+        "accountable": "COO",
+        "consult": "BPM Team",
+        "inform": "Operations Excellence Office"
+      }
+    ],
+    "Structure": [
+      {
+        "activity": "Coordinate governance mechanisms",
+        "responsible": "BPM Team",
+        "accountable": "COO",
+        "consult": "Head of Quality Management",
+        "inform": "All Process Owners"
+      },
+      {
+        "activity": "Evaluate structural performance",
+        "responsible": "Operations Excellence Office",
+        "accountable": "COO",
+        "consult": "Head of Quality Management",
+        "inform": "Strategic Process Owners"
+      },
+      {
+        "activity": "IT-related process changes review",
+        "responsible": "Head of IT Management",
+        "accountable": "COO",
+        "consult": "Head of Quality Management",
+        "inform": "All Process Owners"
+      }
+    ]
+  }
+}

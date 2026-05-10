@@ -1,0 +1,36 @@
+{
+  "workshop_id": "WS-2025-03",
+  "date": "2025-03-14",
+  "facilitator": "BPM Team",
+  "attendees": [
+    "COO",
+    "Strategic Process Owner - Fulfillment",
+    "Strategic Process Owner - Innovation",
+    "Head of Quality Management",
+    "Head of IT Management",
+    "Customer Success Partner"
+  ],
+  "agenda_items": [
+    "Review of current BPM Governance Matrix",
+    "Discussion of overlaps between Fulfillment and Innovation",
+    "Cross-functional communication in customer experience",
+    "Open issues from previous workshop"
+  ],
+  "key_discussion_points": [
+    "Strategic Process Owner Fulfillment expressed concern about unclear handover to Innovation team during product launches",
+    "Head of QM requested clarification on consult role for compliance-related process changes",
+    "COO emphasized that all strategy alignment decisions must remain with executive leadership",
+    "IT Management postponed; awaiting role clarification per project decision",
+    "Customer Success Partner raised that customer experience metrics are siloed across functions"
+  ],
+  "open_issues": [
+    "Two process owners claim accountability for the customer onboarding handover",
+    "No assigned Responsible role for the periodic governance matrix review",
+    "Quality Management is listed as Consult on IT-related process changes despite limited expertise",
+    "End-to-end value optimization process has no Inform path to Sales or Marketing"
+  ],
+  "decisions_taken": [
+    "Schedule follow-up workshop in 4 weeks",
+    "BPM team to draft updated matrix proposal incorporating today's feedback"
+  ]
+}

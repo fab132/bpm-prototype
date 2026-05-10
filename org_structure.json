@@ -1,0 +1,43 @@
+{
+  "company": "Endress+Hauser",
+  "headquarters": "Reinach, Switzerland",
+  "employees": 14000,
+  "structure_type": "Matrix (functional + process roles)",
+  "executive_layer": [
+    {"role": "CEO", "scope": "Group"},
+    {"role": "COO", "scope": "Operations and BPM accountability"},
+    {"role": "CFO", "scope": "Finance (BPM inclusion not yet approved)"},
+    {"role": "CTO", "scope": "Technology and innovation"}
+  ],
+  "process_organization": {
+    "level_0_processes": [
+      "Enterprise Development",
+      "Innovation",
+      "Market and Customer Development",
+      "Fulfillment",
+      "Value Optimization",
+      "People Management",
+      "Quality Management",
+      "IT Management",
+      "Legal Compliance"
+    ],
+    "role_pattern": "Each Level 0 process has a Strategic Process Owner and a Strategic Process Manager (job-sharing). Process roles take precedence over functional roles."
+  },
+  "functional_units": [
+    "Sales",
+    "Marketing",
+    "R&D",
+    "Production",
+    "Quality Management",
+    "IT Management",
+    "Finance",
+    "HR",
+    "Legal"
+  ],
+  "bpm_governance_principles": [
+    "Process role takes precedence over functional role",
+    "Accountability stays human",
+    "BPM is integrated, not isolated",
+    "Matrix is a living document"
+  ]
+}
