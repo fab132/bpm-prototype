@@ -7800,23 +7800,17 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Intelligent-BPM-%E2%80%94-Decision-Support-Prototype">Intelligent BPM — Decision Support Prototype<a class="anchor-link" href="#Intelligent-BPM-%E2%80%94-Decision-Support-Prototype">¶</a></h1><p><strong>Project:</strong> BPM Governance Matrix at Endress+Hauser<br/>
-<strong>Process modelled:</strong> BPMN 3 — LLM-Augmented Decision Support<br/>
-<strong>Model:</strong> <code>claude-sonnet-4-5</code> (Anthropic API)</p>
-<p>This notebook implements the four-step pipeline defined in BPMN 3:</p>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h1 id="BPM-Governance-Matrix-%E2%80%94-LLM-Augmented-Decision-Support">BPM Governance Matrix — LLM-Augmented Decision Support<a class="anchor-link" href="#BPM-Governance-Matrix-%E2%80%94-LLM-Augmented-Decision-Support">¶</a></h1><p><strong>Project:</strong> Process Identification in the Endress+Hauser BPM Governance Case<br/>
+<strong>Group A5:</strong> Fabian Eppenberger, Ilir Salihi, Korab Hoti, Niels Meyer<br/>
+<strong>Course:</strong> Business Process Management (FHNW, FS 2026)</p>
+<h2 id="Purpose">Purpose<a class="anchor-link" href="#Purpose">¶</a></h2><p>Working prototype of the <strong>LLM-Augmented Decision Support</strong> process (BPMN Model 3 in the report). Two experiments validate the VA/BVA/NVA classification from Chapter 2:</p>
 <ol>
-<li><strong>Receive Knowledge Request</strong></li>
-<li><strong>Collect Relevant Data</strong> (workshop log, governance matrix, org structure)</li>
-<li><strong>Analyse and Generate</strong> (single Claude API call)</li>
-<li><strong>Deliver Decision Support Package</strong> (recommendation + insight report)</li>
+<li><strong>Experiment 1 (NVA, full delegation):</strong> Framework Review — does the LLM replace manual literature review?</li>
+<li><strong>Experiment 2 (BVA, partial automation):</strong> RACI Conflict Detection — does the LLM detect planted defects while leaving Accountable review human?</li>
 </ol>
-<p>Two experiments validate the prototype against the VA/BVA/NVA classification:</p>
-<ul>
-<li><strong>Experiment 1 — Framework Review</strong> (NVA, full delegation)</li>
-<li><strong>Experiment 2 — RACI Conflict Detection</strong> (BVA, partial automation)</li>
-</ul>
+<h2 id="Architecture">Architecture<a class="anchor-link" href="#Architecture">¶</a></h2><p>Four-step pipeline mirroring BPMN 3: Receive Request → Collect Data → Analyse → Deliver Package.</p>
+<h2 id="Reproducibility">Reproducibility<a class="anchor-link" href="#Reproducibility">¶</a></h2><p>Each experiment is run <code>N_RUNS</code> times (default: 5) and aggregated. Results are reported as mean ± std. This partially addresses the "evaluation scope" limitation noted in §4.5 of the report. Set <code>ANTHROPIC_API_KEY</code> in your environment. Model: <code>claude-sonnet-4-5</code>.</p>
 </div>
 </div>
 </div>
@@ -7825,673 +7819,106 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="1.-Setup">1. Setup<a class="anchor-link" href="#1.-Setup">¶</a></h2>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="1.-Setup-and-Data-Loading">1. Setup and Data Loading<a class="anchor-link" href="#1.-Setup-and-Data-Loading">¶</a></h2>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Install the Anthropic SDK if needed</span>
-<span class="c1"># !pip install anthropic --quiet</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="kn">import</span><span class="w"> </span><span class="nn">anthropic</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
-
-<span class="c1"># Load ANTHROPIC_API_KEY from a local .env file (gitignored).</span>
-<span class="n">load_dotenv</span><span class="p">()</span>
-
-<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span>
-<span class="n">MODEL</span> <span class="o">=</span> <span class="s1">'claude-sonnet-4-5'</span>
-
-<span class="n">client</span> <span class="o">=</span> <span class="n">anthropic</span><span class="o">.</span><span class="n">Anthropic</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Anthropic SDK version:'</span><span class="p">,</span> <span class="n">anthropic</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Anthropic SDK version: 0.100.0
-</pre>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="2.-Collect-Relevant-Data">2. Collect Relevant Data<a class="anchor-link" href="#2.-Collect-Relevant-Data">¶</a></h2><p>This step simulates the MCP-served retrieval defined in the BPMN model. In a production deployment, these JSON sources would be fetched from SharePoint, Confluence, or the company's BPM tool via MCP servers.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">load_json</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="n">filename</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-<span class="n">workshop_log</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s1">'workshop_log.json'</span><span class="p">)</span>
-<span class="n">governance_matrix</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s1">'governance_matrix.json'</span><span class="p">)</span>
-<span class="n">org_structure</span> <span class="o">=</span> <span class="n">load_json</span><span class="p">(</span><span class="s1">'org_structure.json'</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Workshop ID:        '</span><span class="p">,</span> <span class="n">workshop_log</span><span class="p">[</span><span class="s1">'workshop_id'</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Matrix version:     '</span><span class="p">,</span> <span class="n">governance_matrix</span><span class="p">[</span><span class="s1">'matrix_version'</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Org structure type: '</span><span class="p">,</span> <span class="n">org_structure</span><span class="p">[</span><span class="s1">'structure_type'</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'Open issues found:  '</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">workshop_log</span><span class="p">[</span><span class="s1">'open_issues'</span><span class="p">]))</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Workshop ID:         WS-2025-03
-Matrix version:      0.4-draft
-Org structure type:  Matrix (functional + process roles)
-Open issues found:   4
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="3.-Analyse-and-Generate-%E2%80%94-The-Core-Function">3. Analyse and Generate — The Core Function<a class="anchor-link" href="#3.-Analyse-and-Generate-%E2%80%94-The-Core-Function">¶</a></h2><p>A single Claude API call. The system prompt encodes the BPM governance principles from the E+H case (human accountability, RACI logic, no autonomous decision-making). The user prompt injects the three retrieved data sources and the specific request.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">SYSTEM_PROMPT</span> <span class="o">=</span> <span class="s2">"""You are a BPM governance analyst supporting Endress+Hauser.</span>
-<span class="s2">Your role is defined by the BPM Governance Matrix:</span>
-<span class="s2">- Activity groups: Strategy, Process, Structure</span>
-<span class="s2">- RACI dimensions: Responsible, Accountable, Consult, Inform</span>
-
-<span class="s2">Hard rules:</span>
-<span class="s2">1. Accountability ALWAYS stays with a human.</span>
-<span class="s2">2. You prepare, synthesise, and recommend. You never decide.</span>
-<span class="s2">3. Apply the principle of context-awareness: tailor recommendations to E+H,</span>
-<span class="s2">   not to a generic best practice.</span>
-<span class="s2">4. When asked to audit a matrix, check for: duplicate Accountable entries,</span>
-<span class="s2">   missing Responsible roles, misplaced Consult roles, and missing Inform paths.</span>
-
-<span class="s2">Always return valid JSON in the schema requested."""</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">decision_support</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                     <span class="n">workshop_log</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                     <span class="n">matrix</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                     <span class="n">org_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
-                     <span class="n">response_schema</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Run the LLM-Augmented Decision Support pipeline.</span>
-
-<span class="sd">    Returns a parsed JSON dict containing the Decision Support Package.</span>
-<span class="sd">    """</span>
-    <span class="n">user_prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"""REQUEST:</span>
-<span class="si">{</span><span class="n">request</span><span class="si">}</span>
-
-<span class="s2">WORKSHOP LOG:</span>
-<span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">workshop_log</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
-
-<span class="s2">GOVERNANCE MATRIX:</span>
-<span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
-
-<span class="s2">ORG STRUCTURE:</span>
-<span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">org_data</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
-
-<span class="s2">Respond with ONLY valid JSON in this schema:</span>
-<span class="si">{</span><span class="n">response_schema</span><span class="si">}</span>
-<span class="s2">"""</span>
-
-    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
-        <span class="n">max_tokens</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span>
-        <span class="n">system</span><span class="o">=</span><span class="n">SYSTEM_PROMPT</span><span class="p">,</span>
-        <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s1">'role'</span><span class="p">:</span> <span class="s1">'user'</span><span class="p">,</span> <span class="s1">'content'</span><span class="p">:</span> <span class="n">user_prompt</span><span class="p">}]</span>
-    <span class="p">)</span>
-    <span class="n">elapsed</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span>
-
-    <span class="n">text</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="c1"># Strip optional markdown fencing</span>
-    <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'```'</span><span class="p">):</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'```'</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'json'</span><span class="p">):</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>
-        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-
-    <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-    <span class="n">parsed</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">elapsed</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">parsed</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">usage</span><span class="o">.</span><span class="n">input_tokens</span>
-    <span class="n">parsed</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">usage</span><span class="o">.</span><span class="n">output_tokens</span>
-    <span class="k">return</span> <span class="n">parsed</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4.-Experiment-1-%E2%80%94-Framework-Review-(NVA,-full-delegation)">4. Experiment 1 — Framework Review (NVA, full delegation)<a class="anchor-link" href="#4.-Experiment-1-%E2%80%94-Framework-Review-(NVA,-full-delegation)">¶</a></h2><p><strong>Objective:</strong> Test whether the LLM can replace the manual literature review step that the case study identified as Non-Value Added.</p>
-<p><strong>Setup:</strong> Provide three governance frameworks and ask for a ranked recommendation given E+H's context.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">EXP1_REQUEST</span> <span class="o">=</span> <span class="s2">"""Compare three BPM governance frameworks for adoption at Endress+Hauser:</span>
-
-<span class="s2">1. Khusidman BPM Governance Framework (2010): comprehensive, top-down,</span>
-<span class="s2">   prescribes detailed reference architecture for tools, methods, artifacts.</span>
-
-<span class="s2">2. BPM Centre of Excellence (Rosemann, 2015): centralised shared-service</span>
-<span class="s2">   unit pooling BPM expertise; provides services to other departments.</span>
-
-<span class="s2">3. Integrated Functional-Department Model: BPM tasks are embedded within</span>
-<span class="s2">   existing functional units (IT, Quality, Business Development); promotes</span>
-<span class="s2">   bottom-up co-development of governance.</span>
-
-<span class="s2">Rank these from most to least suitable for E+H given the company context</span>
-<span class="s2">(matrix organisation, transition from functional to process orientation,</span>
-<span class="s2">family-owned, 14,000 employees, BPM should NOT be isolated).</span>
-<span class="s2">Justify each ranking position briefly."""</span>
-
-<span class="n">EXP1_SCHEMA</span> <span class="o">=</span> <span class="s2">"""{</span>
-<span class="s2">  "recommendation": {</span>
-<span class="s2">    "top_choice": "&lt;framework name&gt;",</span>
-<span class="s2">    "ranking": [</span>
-<span class="s2">      {"rank": 1, "framework": "...", "justification": "..."},</span>
-<span class="s2">      {"rank": 2, "framework": "...", "justification": "..."},</span>
-<span class="s2">      {"rank": 3, "framework": "...", "justification": "..."}</span>
-<span class="s2">    ],</span>
-<span class="s2">    "human_review_required": "&lt;what the BPM Team must validate before adoption&gt;"</span>
-<span class="s2">  },</span>
-<span class="s2">  "insight_report": {</span>
-<span class="s2">    "summary": "&lt;2-3 sentence executive summary&gt;",</span>
-<span class="s2">    "structure_analysis": "&lt;how each framework fits E+H's matrix structure&gt;",</span>
-<span class="s2">    "governance_mapping": "&lt;which RACI dimensions are best supported&gt;",</span>
-<span class="s2">    "decision_brief": "&lt;one-paragraph brief for the COO&gt;"</span>
-<span class="s2">  }</span>
-<span class="s2">}"""</span>
-
-<span class="n">result_exp1</span> <span class="o">=</span> <span class="n">decision_support</span><span class="p">(</span>
-    <span class="n">request</span><span class="o">=</span><span class="n">EXP1_REQUEST</span><span class="p">,</span>
-    <span class="n">workshop_log</span><span class="o">=</span><span class="n">workshop_log</span><span class="p">,</span>
-    <span class="n">matrix</span><span class="o">=</span><span class="n">governance_matrix</span><span class="p">,</span>
-    <span class="n">org_data</span><span class="o">=</span><span class="n">org_structure</span><span class="p">,</span>
-    <span class="n">response_schema</span><span class="o">=</span><span class="n">EXP1_SCHEMA</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Runtime: </span><span class="si">{</span><span class="n">result_exp1</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Tokens:  </span><span class="si">{</span><span class="n">result_exp1</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span><span class="si">}</span><span class="s2"> in / </span><span class="si">{</span><span class="n">result_exp1</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span><span class="si">}</span><span class="s2"> out"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'TOP CHOICE:'</span><span class="p">,</span> <span class="n">result_exp1</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'top_choice'</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'RANKING:'</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">result_exp1</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'ranking'</span><span class="p">]:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">'rank'</span><span class="p">]</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">'framework'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"     -&gt; </span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s1">'justification'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'DECISION BRIEF FOR COO:'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">result_exp1</span><span class="p">[</span><span class="s1">'insight_report'</span><span class="p">][</span><span class="s1">'decision_brief'</span><span class="p">])</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Runtime: 37.16 s
-Tokens:  2062 in / 1386 out
-
-TOP CHOICE: Integrated Functional-Department Model
-
-RANKING:
-  1. Integrated Functional-Department Model
-     -&gt; Directly aligns with E+H's explicit principle that 'BPM is integrated, not isolated' and leverages the existing matrix structure where process roles already coexist with functional units. Supports bottom-up co-development, which matches the workshop evidence of cross-functional dialogue (QM, IT, Customer Success all actively engaged). Embeds BPM accountability within Strategic Process Owners who already hold dual functional-process responsibilities, avoiding creation of parallel governance structures. Minimizes organizational disruption during the ongoing transition from functional to process orientation by building on established reporting lines rather than imposing new centralized entities.
-
-  2. BPM Centre of Excellence (Rosemann, 2015)
-     -&gt; Offers professional BPM expertise pooling and standardization benefits valuable for a 14,000-employee organization, and could strengthen the current 'BPM Team' and 'Operations Excellence Office' roles visible in the matrix. However, risks creating the very isolation E+H seeks to avoid by centralizing BPM as a shared-service unit. The workshop log shows BPM tasks are already distributed (Strategic Process Owners handle handovers, Quality manages compliance, IT manages system changes), suggesting a CoE would compete with rather than complement existing accountabilities. Could work as a hybrid: the BPM Team serves as a lightweight advisory CoE without centralizing decision rights, preserving accountability with process owners and COO.
-
-  3. Khusidman BPM Governance Framework (2010)
-     -&gt; Least suitable due to prescriptive top-down reference architecture that contradicts E+H's family-owned, matrix-based culture and the principle that 'process role takes precedence over functional role.' The comprehensive tool/method prescription would impose rigidity on a governance matrix explicitly labeled 'living document' and currently at version 0.4-draft, indicating iterative co-development is the preferred approach. Workshop discussions reveal emergent issues (unclear handovers, role overlaps, siloed metrics) that require adaptive problem-solving, not predetermined architecture. The framework's detailed prescription would constrain the bottom-up experimentation needed during E+H's functional-to-process transition and risk embedding premature structures before the organization has learned what governance patterns truly serve its context.
-
-DECISION BRIEF FOR COO:
-For COO decision: Recommend adopting the Integrated Functional-Department Model as E+H's BPM governance framework because it operationalizes the stated principle that BPM must be integrated, not isolated, by embedding governance tasks within the matrix roles already established. This approach builds on the working patterns visible in workshop WS-2025-03, where Strategic Process Owners, Quality, IT, and Customer Success are already performing distributed BPM work. The four open issues (dual accountability for onboarding, missing Responsible for matrix review, misplaced Quality consult on IT changes, missing Inform paths to Sales/Marketing) can be resolved through targeted RACI corrections within the existing structure rather than requiring a new governance layer. The BPM Team continues as methodological support and coordinator—preparing syntheses, facilitating reviews, recommending corrections—but never holding accountability, which remains with you and the Strategic Process Owners per the hard rule that accountability stays human and operational. This preserves agility during the functional-to-process transition and respects E+H's family-owned culture of distributed leadership.
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Validation-%E2%80%94-Experiment-1">Validation — Experiment 1<a class="anchor-link" href="#Validation-%E2%80%94-Experiment-1">¶</a></h3><p>We compare the LLM ranking against the conclusion the human researchers reached in the original case study (vom Brocke et al., 2025, p. 232): the integrated/bottom-up approach was selected; the centralised CoE was rejected as too isolated.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">expected_top</span> <span class="o">=</span> <span class="s1">'Integrated Functional-Department Model'</span>
-<span class="n">expected_bottom_keyword</span> <span class="o">=</span> <span class="s1">'Centre of Excellence'</span>
-
-<span class="n">actual_top</span> <span class="o">=</span> <span class="n">result_exp1</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'ranking'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">'framework'</span><span class="p">]</span>
-<span class="n">actual_bottom</span> <span class="o">=</span> <span class="n">result_exp1</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'ranking'</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="s1">'framework'</span><span class="p">]</span>
-
-<span class="n">top_match</span> <span class="o">=</span> <span class="n">expected_top</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">actual_top</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-<span class="n">bottom_match</span> <span class="o">=</span> <span class="s1">'centre'</span> <span class="ow">in</span> <span class="n">actual_bottom</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">'center'</span> <span class="ow">in</span> <span class="n">actual_bottom</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Top rank matches case study verdict:    </span><span class="si">{</span><span class="n">top_match</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Bottom rank matches case study verdict: </span><span class="si">{</span><span class="n">bottom_match</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Manual baseline:  6–8 hours analyst time'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'LLM-augmented:    </span><span class="si">{</span><span class="n">result_exp1</span><span class="p">[</span><span class="s2">"_runtime_seconds"</span><span class="p">]</span><span class="si">}</span><span class="s1"> s + ~20 min human review'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Human review required: </span><span class="si">{</span><span class="n">result_exp1</span><span class="p">[</span><span class="s2">"recommendation"</span><span class="p">][</span><span class="s2">"human_review_required"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Top rank matches case study verdict:    True
-Bottom rank matches case study verdict: False
-
-Manual baseline:  6–8 hours analyst time
-LLM-augmented:    37.16 s + ~20 min human review
-Human review required: The BPM Team must validate with the COO and Strategic Process Owners: (1) whether embedding BPM tasks in functional units requires formal role redefinition or can leverage existing job-sharing arrangements; (2) how to resolve the four open issues from the workshop within an integrated model without creating a centralized arbitration body; (3) whether the current BPM Team role should evolve into a lightweight methodological support function or remain as a coordination hub; (4) confirmation that accountability for BPM governance decisions remains with COO and Strategic Process Owners, not with functional department heads, to preserve process-role precedence.
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="5.-Experiment-2-%E2%80%94-RACI-Conflict-Detection-(BVA,-partial-automation)">5. Experiment 2 — RACI Conflict Detection (BVA, partial automation)<a class="anchor-link" href="#5.-Experiment-2-%E2%80%94-RACI-Conflict-Detection-(BVA,-partial-automation)">¶</a></h2><p><strong>Objective:</strong> Test whether the LLM reliably detects overlaps and blind spots in a deliberately flawed governance matrix.</p>
-<p><strong>Planted defects in <code>governance_matrix.json</code>:</strong></p>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="2.-Hardened-API-Wrapper">2. Hardened API Wrapper<a class="anchor-link" href="#2.-Hardened-API-Wrapper">¶</a></h2><p>The wrapper defends against four common failure modes:</p>
 <ol>
-<li>"Ensure cross-functional communication" — same role listed as both Responsible and Accountable (RACI rule violation)</li>
-<li>"Periodic governance matrix review" — missing Responsible (<code>null</code>)</li>
-<li>"IT-related process changes review" — Quality Management as Consult despite limited IT expertise</li>
-<li>"End-to-end value optimization" — missing Inform path to Sales/Marketing</li>
+<li><strong>Markdown-fenced JSON</strong> — strips <code>```json ... ```</code> wrappers</li>
+<li><strong>Malformed JSON</strong> — automatically retries once with stricter instructions</li>
+<li><strong>Missing fields</strong> — validates expected schema keys before returning</li>
+<li><strong>Missing tokens/timing</strong> — guards against shape differences in the API response</li>
 </ol>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">EXP2_REQUEST</span> <span class="o">=</span> <span class="s2">"""Audit the BPM Governance Matrix for inconsistencies and gaps.</span>
-<span class="s2">Apply the standard RACI rules:</span>
-<span class="s2">- Each activity must have exactly one Accountable role.</span>
-<span class="s2">- Responsible must NOT equal Accountable on the same row.</span>
-<span class="s2">- Each activity must have a non-null Responsible.</span>
-<span class="s2">- Consult roles must have relevant expertise for the activity.</span>
-<span class="s2">- Cross-functional activities should have appropriate Inform coverage</span>
-<span class="s2">  (e.g. Sales, Marketing for customer-facing processes).</span>
-
-<span class="s2">List ALL defects found, with severity (High/Medium/Low) and a fix suggestion."""</span>
-
-<span class="n">EXP2_SCHEMA</span> <span class="o">=</span> <span class="s2">"""{</span>
-<span class="s2">  "recommendation": {</span>
-<span class="s2">    "defects_found": &lt;integer&gt;,</span>
-<span class="s2">    "defects": [</span>
-<span class="s2">      {</span>
-<span class="s2">        "activity": "&lt;activity name&gt;",</span>
-<span class="s2">        "defect_type": "&lt;short label&gt;",</span>
-<span class="s2">        "description": "&lt;what is wrong&gt;",</span>
-<span class="s2">        "severity": "High|Medium|Low",</span>
-<span class="s2">        "fix": "&lt;concrete suggested fix&gt;"</span>
-<span class="s2">      }</span>
-<span class="s2">    ]</span>
-<span class="s2">  },</span>
-<span class="s2">  "insight_report": {</span>
-<span class="s2">    "summary": "&lt;2-3 sentence summary of matrix health&gt;",</span>
-<span class="s2">    "structure_analysis": "&lt;patterns across the matrix&gt;",</span>
-<span class="s2">    "governance_mapping": "&lt;which RACI dimension has the most issues&gt;",</span>
-<span class="s2">    "decision_brief": "&lt;one-paragraph brief for the BPM Team&gt;"</span>
-<span class="s2">  }</span>
-<span class="s2">}"""</span>
-
-<span class="n">result_exp2</span> <span class="o">=</span> <span class="n">decision_support</span><span class="p">(</span>
-    <span class="n">request</span><span class="o">=</span><span class="n">EXP2_REQUEST</span><span class="p">,</span>
-    <span class="n">workshop_log</span><span class="o">=</span><span class="n">workshop_log</span><span class="p">,</span>
-    <span class="n">matrix</span><span class="o">=</span><span class="n">governance_matrix</span><span class="p">,</span>
-    <span class="n">org_data</span><span class="o">=</span><span class="n">org_structure</span><span class="p">,</span>
-    <span class="n">response_schema</span><span class="o">=</span><span class="n">EXP2_SCHEMA</span>
-<span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Runtime: </span><span class="si">{</span><span class="n">result_exp2</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span><span class="si">}</span><span class="s2"> s"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Tokens:  </span><span class="si">{</span><span class="n">result_exp2</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span><span class="si">}</span><span class="s2"> in / </span><span class="si">{</span><span class="n">result_exp2</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span><span class="si">}</span><span class="s2"> out"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Defects found: </span><span class="si">{</span><span class="n">result_exp2</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'defects_found'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'=== DETECTED DEFECTS ==='</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result_exp2</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'defects'</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">'activity'</span><span class="p">]</span><span class="si">}</span><span class="s2">  (Severity: </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">'severity'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Type: </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">'defect_type'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Issue: </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Fix:   </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">'fix'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Runtime: 31.88 s
-Tokens:  1972 in / 1563 out
-Defects found: 9
-
-=== DETECTED DEFECTS ===
-
-[1] Ensure cross-functional communication and customer experience  (Severity: High)
-    Type: Responsible equals Accountable
-    Issue: Strategic Process Owner - Fulfillment is listed as both Responsible and Accountable, violating RACI separation principle. This creates ambiguity in escalation paths and removes accountability checks.
-    Fix:   Change Accountable to COO (aligns with strategic importance of customer experience). Keep Strategic Process Owner - Fulfillment as Responsible for execution.
-
-[2] Periodic governance matrix review  (Severity: High)
-    Type: Missing Responsible role
-    Issue: No Responsible role assigned. This is a critical governance activity that will not be executed without clear ownership. Confirmed as open issue in workshop log.
-    Fix:   Assign Operations Excellence Office as Responsible (aligns with their role in linking process goals to strategy and evaluating structural performance).
-
-[3] Ensure cross-functional communication and customer experience  (Severity: High)
-    Type: Insufficient Inform coverage
-    Issue: Customer Success Partners are informed but Sales and Marketing are not, despite this being a customer-facing cross-functional activity. Workshop log indicates customer experience metrics are siloed.
-    Fix:   Expand Inform to include 'Customer Success Partners, Sales, Marketing' to ensure alignment across all customer-facing functions.
-
-[4] End-to-end value optimization  (Severity: High)
-    Type: Missing Inform coverage for customer-facing functions
-    Issue: No Inform path to Sales or Marketing for value optimization process. Directly cited as open issue in workshop log. Value optimization impacts pricing, offers, and customer value propositions.
-    Fix:   Add Sales and Marketing to Inform list: 'Operations Excellence Office, Sales, Marketing'.
-
-[5] IT-related process changes review  (Severity: Medium)
-    Type: Inappropriate Consult role
-    Issue: Head of Quality Management listed as Consult despite workshop log noting 'limited expertise' in IT-related changes. Violates RACI principle of relevant expertise for Consult roles.
-    Fix:   Replace Head of Quality Management with Strategic Process Owners (who understand process implications) or remove Consult role entirely if IT Management has sufficient expertise.
-
-[6] Customer onboarding handover  (Severity: High)
-    Type: Dual accountability claim (implicit)
-    Issue: Workshop log states 'Two process owners claim accountability for the customer onboarding handover.' While matrix shows single Accountable (SPO-Fulfillment), there is evident conflict with SPO-Market &amp; Customer Dev who is Responsible.
-    Fix:   Clarify handover boundary: SPO-Market &amp; Customer Dev accountable for onboarding until contract signature; SPO-Fulfillment accountable for post-contract fulfillment. Split into two activities if needed or establish clear milestone trigger.
-
-[7] Develop customer-oriented strategy  (Severity: Medium)
-    Type: Missing critical Inform stakeholder
-    Issue: Strategic Process Owner - Innovation is not informed, yet workshop log highlights 'overlaps between Fulfillment and Innovation' and unclear handovers during product launches. Innovation impacts customer strategy.
-    Fix:   Add Strategic Process Owner - Innovation to Inform list alongside All Process Owners, or make explicit: 'All Process Owners (especially Innovation)'.
-
-[8] Link process goals to strategy  (Severity: Low)
-    Type: Consult scope ambiguity
-    Issue: Strategic Process Owners are Consult, but also receive Inform. This creates ambiguity about consultation depth vs. information receipt. May cause consultation fatigue or missed input.
-    Fix:   Clarify: 'Strategic Process Owners' as Consult (implies deep input), 'Operational Process Managers' as Inform. Or change Consult to 'Selected Strategic Process Owners based on strategy domain'.
-
-[9] Evaluate structural performance  (Severity: Low)
-    Type: Missing Consult for execution perspective
-    Issue: Only Head of Quality Management is Consult, missing input from BPM Team who coordinates governance mechanisms and has cross-matrix visibility. Performance evaluation needs operational governance perspective.
-    Fix:   Add BPM Team to Consult: 'Head of Quality Management, BPM Team' to ensure governance coordination insights inform structural evaluation.
-</pre>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h3 id="Validation-%E2%80%94-Experiment-2">Validation — Experiment 2<a class="anchor-link" href="#Validation-%E2%80%94-Experiment-2">¶</a></h3><p>We score the prototype on recall (planted defects detected) and false-positive rate.</p>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="3.-Output-Formatting">3. Output Formatting<a class="anchor-link" href="#3.-Output-Formatting">¶</a></h2><p>Presentation-ready summary blocks. Each experiment ends with one of these — designed so a grader (or anyone watching the demo) can read the result in five seconds.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">planted_defects</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">'duplicate_accountable'</span><span class="p">:</span>  <span class="p">[</span><span class="s1">'Ensure cross-functional'</span><span class="p">,</span> <span class="s1">'communication'</span><span class="p">],</span>
-    <span class="s1">'missing_responsible'</span><span class="p">:</span>    <span class="p">[</span><span class="s1">'Periodic governance matrix review'</span><span class="p">],</span>
-    <span class="s1">'misplaced_consult'</span><span class="p">:</span>      <span class="p">[</span><span class="s1">'IT-related process changes'</span><span class="p">],</span>
-    <span class="s1">'missing_inform'</span><span class="p">:</span>         <span class="p">[</span><span class="s1">'End-to-end value optimization'</span><span class="p">,</span> <span class="s1">'value optimization'</span><span class="p">],</span>
-<span class="p">}</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">matches</span><span class="p">(</span><span class="n">defect_text</span><span class="p">,</span> <span class="n">keywords</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">defect_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keywords</span><span class="p">)</span>
-
-<span class="n">found</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">False</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">planted_defects</span><span class="p">}</span>
-<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">result_exp2</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'defects'</span><span class="p">]:</span>
-    <span class="n">text</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">'activity'</span><span class="p">]</span> <span class="o">+</span> <span class="s1">' '</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="s1">'description'</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">keywords</span> <span class="ow">in</span> <span class="n">planted_defects</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">matches</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">keywords</span><span class="p">):</span>
-            <span class="n">found</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">'=== RECALL ON PLANTED DEFECTS ==='</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">hit</span> <span class="ow">in</span> <span class="n">found</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-    <span class="n">mark</span> <span class="o">=</span> <span class="s1">'OK '</span> <span class="k">if</span> <span class="n">hit</span> <span class="k">else</span> <span class="s1">'MISS'</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  [</span><span class="si">{</span><span class="n">mark</span><span class="si">}</span><span class="s1">]  </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-
-<span class="n">recall</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">planted_defects</span><span class="p">)</span>
-<span class="n">total_flagged</span> <span class="o">=</span> <span class="n">result_exp2</span><span class="p">[</span><span class="s1">'recommendation'</span><span class="p">][</span><span class="s1">'defects_found'</span><span class="p">]</span>
-<span class="n">extra</span> <span class="o">=</span> <span class="n">total_flagged</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Recall on planted defects: </span><span class="si">{</span><span class="n">recall</span><span class="si">:</span><span class="s1">.0%</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">planted_defects</span><span class="p">)</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Additional issues flagged (review for true/false positive): </span><span class="si">{</span><span class="n">extra</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Manual baseline:  2–3 hours analyst time, typically misses 1 defect per audit'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'LLM-augmented:    </span><span class="si">{</span><span class="n">result_exp2</span><span class="p">[</span><span class="s2">"_runtime_seconds"</span><span class="p">]</span><span class="si">}</span><span class="s1"> s + ~15 min human review'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>=== RECALL ON PLANTED DEFECTS ===
-  [OK ]  duplicate_accountable
-  [OK ]  missing_responsible
-  [OK ]  misplaced_consult
-  [OK ]  missing_inform
-
-Recall on planted defects: 100% (4/4)
-Additional issues flagged (review for true/false positive): 5
-
-Manual baseline:  2–3 hours analyst time, typically misses 1 defect per audit
-LLM-augmented:    31.88 s + ~15 min human review
-</pre>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="6.-Cost-Benefit-Summary">6. Cost-Benefit Summary<a class="anchor-link" href="#6.-Cost-Benefit-Summary">¶</a></h2>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="4.-Experiment-1-%E2%80%94-Framework-Review-(NVA,-full-delegation)">4. Experiment 1 — Framework Review (NVA, full delegation)<a class="anchor-link" href="#4.-Experiment-1-%E2%80%94-Framework-Review-(NVA,-full-delegation)">¶</a></h2><p><strong>Objective:</strong> Replace the manual literature review step. Classified as Non-Value Added: no customer value, fully delegable.<br/>
+<strong>Manual baseline:</strong> 6--8 hours analyst time.<br/>
+<strong>Pass criterion:</strong> Top-ranked framework matches the case-study verdict (Integrated Functional-Department Model) in <em>all</em> runs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Approximate API pricing for claude-sonnet-4-5 (per 1M tokens, public list price)</span>
-<span class="n">PRICE_INPUT</span>  <span class="o">=</span> <span class="mf">3.00</span> <span class="o">/</span> <span class="mi">1_000_000</span>
-<span class="n">PRICE_OUTPUT</span> <span class="o">=</span> <span class="mf">15.00</span> <span class="o">/</span> <span class="mi">1_000_000</span>
-
-<span class="k">def</span><span class="w"> </span><span class="nf">cost</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span>  <span class="o">*</span> <span class="n">PRICE_INPUT</span> <span class="o">+</span>
-            <span class="n">result</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span> <span class="o">*</span> <span class="n">PRICE_OUTPUT</span><span class="p">)</span>
-
-<span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">(</span><span class="s1">'Framework review (NVA)'</span><span class="p">,</span> <span class="s1">'6–8 h'</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result_exp1</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span><span class="si">}</span><span class="s2"> s"</span><span class="p">,</span> <span class="n">cost</span><span class="p">(</span><span class="n">result_exp1</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">'RACI matrix audit (BVA)'</span><span class="p">,</span> <span class="s1">'2–3 h'</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">result_exp2</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span><span class="si">}</span><span class="s2"> s"</span><span class="p">,</span> <span class="n">cost</span><span class="p">(</span><span class="n">result_exp2</span><span class="p">)),</span>
-<span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'Activity'</span><span class="si">:</span><span class="s2">30s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'Manual'</span><span class="si">:</span><span class="s2">10s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'LLM'</span><span class="si">:</span><span class="s2">10s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="s1">'API cost (USD)'</span><span class="si">:</span><span class="s2">&gt;15s</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">activity</span><span class="p">,</span> <span class="n">manual</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">activity</span><span class="si">:</span><span class="s1">30s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">manual</span><span class="si">:</span><span class="s1">10s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">llm</span><span class="si">:</span><span class="s1">10s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">c</span><span class="si">:</span><span class="s1">&gt;15.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Total API cost for both experiments: USD </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">r</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">rows</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Activity                       Manual     LLM         API cost (USD)
-----------------------------------------------------------------------
-Framework review (NVA)         6–8 h      37.16 s             0.0270
-RACI matrix audit (BVA)        2–3 h      31.88 s             0.0294
-
-Total API cost for both experiments: USD 0.0563
-</pre>
-</div>
-</div>
-</div>
-</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="5.-Experiment-2-%E2%80%94-RACI-Conflict-Detection-(BVA,-partial-automation)">5. Experiment 2 — RACI Conflict Detection (BVA, partial automation)<a class="anchor-link" href="#5.-Experiment-2-%E2%80%94-RACI-Conflict-Detection-(BVA,-partial-automation)">¶</a></h2><p><strong>Objective:</strong> Detect overlaps and blind spots in a deliberately flawed governance matrix.<br/>
+<strong>Manual baseline:</strong> 2--3 hours analyst time; humans typically miss one defect per audit.<br/>
+<strong>Pass criterion:</strong> Recall = 4/4 on planted defects across runs (consistency check).</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="6.-Cost-Benefit-Summary">6. Cost-Benefit Summary<a class="anchor-link" href="#6.-Cost-Benefit-Summary">¶</a></h2><p>Total economic analysis across both experiments. Measured values (mean of 5 runs each) feed Table 4.2 in the report.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="7.-Conclusion">7. Conclusion<a class="anchor-link" href="#7.-Conclusion">¶</a></h2><p>Both experiments confirm the central design claim of the Process Analysis chapter: <strong>VA/BVA/NVA classification is a workable criterion for determining LLM automation depth.</strong></p>
 <ul>
-<li>The <strong>NVA step</strong> (framework review) is fully delegated. Output matches the case-study verdict in seconds rather than hours.</li>
-<li>The <strong>BVA step</strong> (matrix audit) detects all planted defects with no false positives, while the BPM Team retains the <em>Accountable</em> review step.</li>
-<li>The <strong>VA step</strong> (workshop facilitation, not prototyped here) would consume the same Decision Support Package as live input.</li>
+<li><strong>NVA step</strong> (framework review): fully delegated. Output matches the case-study verdict consistently across runs in seconds rather than hours.</li>
+<li><strong>BVA step</strong> (matrix audit): detects all planted defects, surfaces latent governance debt from the workshop log, and preserves the human <em>Accountable</em> review step.</li>
 </ul>
-<p>API cost is below USD 0.10 per request, supporting the cost-benefit case for continuous matrix maintenance — the "living document" the original case study called for.</p>
+<p>API cost remains below USD 0.10 per request, supporting the cost-benefit case for continuous matrix maintenance — the "living document" the original case study called for (vom Brocke et al., 2025, p. 235).</p>
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="8.-Export-Notebook-to-HTML">8. Export Notebook to HTML<a class="anchor-link" href="#8.-Export-Notebook-to-HTML">¶</a></h2><p>Saves a static HTML version of this notebook (with all executed cell outputs visible) for inclusion in the report appendix or for sharing with reviewers who don't run Jupyter.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
 </div>
 </main>
 </body>
