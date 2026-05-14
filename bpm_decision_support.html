@@ -7800,7 +7800,8 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h1 id="BPM-Governance-Matrix-%E2%80%94-LLM-Augmented-Decision-Support">BPM Governance Matrix — LLM-Augmented Decision Support<a class="anchor-link" href="#BPM-Governance-Matrix-%E2%80%94-LLM-Augmented-Decision-Support">¶</a></h1><p><strong>Project:</strong> Process Identification in the Endress+Hauser BPM Governance Case<br/>
 <strong>Group A5:</strong> Fabian Eppenberger, Ilir Salihi, Korab Hoti, Niels Meyer<br/>
 <strong>Course:</strong> Business Process Management (FHNW, FS 2026)</p>
@@ -7819,19 +7820,239 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="1.-Setup-and-Data-Loading">1. Setup and Data Loading<a class="anchor-link" href="#1.-Setup-and-Data-Loading">¶</a></h2>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">anthropic</span>
+
+<span class="c1"># Configuration</span>
+<span class="n">MODEL</span> <span class="o">=</span> <span class="s1">'claude-sonnet-4-5'</span>
+<span class="n">MAX_TOKENS</span> <span class="o">=</span> <span class="mi">4000</span>
+<span class="n">N_RUNS</span> <span class="o">=</span> <span class="mi">5</span>                       <span class="c1"># runs per experiment for statistical validation</span>
+<span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s1">'.'</span><span class="p">)</span>
+
+<span class="c1"># API pricing (per 1M tokens, public list price for claude-sonnet-4-5)</span>
+<span class="n">PRICE_INPUT_PER_MILLION</span> <span class="o">=</span> <span class="mf">3.00</span>
+<span class="n">PRICE_OUTPUT_PER_MILLION</span> <span class="o">=</span> <span class="mf">15.00</span>
+
+<span class="c1"># Sanity check</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'ANTHROPIC_API_KEY'</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">EnvironmentError</span><span class="p">(</span>
+        <span class="s1">'ANTHROPIC_API_KEY not set. Set it via: export ANTHROPIC_API_KEY="sk-..."'</span>
+    <span class="p">)</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">anthropic</span><span class="o">.</span><span class="n">Anthropic</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Client ready. Model: </span><span class="si">{</span><span class="n">MODEL</span><span class="si">}</span><span class="s1"> | N_RUNS per experiment: </span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Client ready. Model: claude-sonnet-4-5 | N_RUNS per experiment: 5
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the three retrieval sources (workshop log, governance matrix, org structure)</span>
+<span class="c1"># In a production setting these would be MCP-served from SharePoint, Confluence, BPM tools.</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">load_json_safe</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Load JSON with a clear error if the file is missing or malformed."""</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">'r'</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">'utf-8'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Required data file missing: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Malformed JSON in </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="n">workshop_log</span> <span class="o">=</span> <span class="n">load_json_safe</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">'workshop_log.json'</span><span class="p">)</span>
+<span class="n">governance_matrix</span> <span class="o">=</span> <span class="n">load_json_safe</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">'governance_matrix.json'</span><span class="p">)</span>
+<span class="n">org_structure</span> <span class="o">=</span> <span class="n">load_json_safe</span><span class="p">(</span><span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s1">'org_structure.json'</span><span class="p">)</span>
+
+<span class="c1"># Count items using the actual key names in our data files</span>
+<span class="n">n_workshop_items</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">workshop_log</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'agenda_items'</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">workshop_log</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'open_issues'</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">workshop_log</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'key_discussion_points'</span><span class="p">,</span> <span class="p">[]))</span>
+<span class="p">)</span>
+<span class="n">n_activities</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">activities</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">activities</span> <span class="ow">in</span> <span class="n">governance_matrix</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'activity_groups'</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="n">n_roles</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">len</span><span class="p">(</span><span class="n">org_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'executive_layer'</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">org_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'functional_units'</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">org_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'process_organization'</span><span class="p">,</span> <span class="p">[])</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">org_structure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'process_organization'</span><span class="p">),</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[])</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'workshop_log:      </span><span class="si">{</span><span class="n">n_workshop_items</span><span class="si">}</span><span class="s1"> items (agenda + issues + discussion points)'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'governance_matrix: </span><span class="si">{</span><span class="n">n_activities</span><span class="si">}</span><span class="s1"> activities across </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">governance_matrix</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"activity_groups"</span><span class="p">,</span><span class="w"> </span><span class="p">{}))</span><span class="si">}</span><span class="s1"> activity groups'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'org_structure:     </span><span class="si">{</span><span class="n">n_roles</span><span class="si">}</span><span class="s1"> roles in executive + functional layers'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>workshop_log:      13 items (agenda + issues + discussion points)
+governance_matrix: 9 activities across 3 activity groups
+org_structure:     13 roles in executive + functional layers
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">'workshop_log keys:     '</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">workshop_log</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'governance_matrix keys:'</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">governance_matrix</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'org_structure keys:    '</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">org_structure</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'--- workshop_log (first 500 chars) ---'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">workshop_log</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:</span><span class="mi">500</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'--- governance_matrix (first 500 chars) ---'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">governance_matrix</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:</span><span class="mi">500</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'--- org_structure (first 500 chars) ---'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">org_structure</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)[:</span><span class="mi">500</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>workshop_log keys:      ['workshop_id', 'date', 'facilitator', 'attendees', 'agenda_items', 'key_discussion_points', 'open_issues', 'decisions_taken']
+governance_matrix keys: ['matrix_version', 'last_updated', 'activity_groups']
+org_structure keys:     ['company', 'headquarters', 'employees', 'structure_type', 'executive_layer', 'process_organization', 'functional_units', 'bpm_governance_principles']
+
+--- workshop_log (first 500 chars) ---
+{
+  "workshop_id": "WS-2025-03",
+  "date": "2025-03-14",
+  "facilitator": "BPM Team",
+  "attendees": [
+    "COO",
+    "Strategic Process Owner - Fulfillment",
+    "Strategic Process Owner - Innovation",
+    "Head of Quality Management",
+    "Head of IT Management",
+    "Customer Success Partner"
+  ],
+  "agenda_items": [
+    "Review of current BPM Governance Matrix",
+    "Discussion of overlaps between Fulfillment and Innovation",
+    "Cross-functional communication in customer experience",
+    "
+
+--- governance_matrix (first 500 chars) ---
+{
+  "matrix_version": "0.4-draft",
+  "last_updated": "2025-03-14",
+  "activity_groups": {
+    "Strategy": [
+      {
+        "activity": "Develop customer-oriented strategy",
+        "responsible": "Strategic Process Owner - Market &amp; Customer Dev",
+        "accountable": "COO",
+        "consult": "Head of Sales",
+        "inform": "All Process Owners"
+      },
+      {
+        "activity": "Link process goals to strategy",
+        "responsible": "Operations Excellence Office",
+        "accountable"
+
+--- org_structure (first 500 chars) ---
+{
+  "company": "Endress+Hauser",
+  "headquarters": "Reinach, Switzerland",
+  "employees": 14000,
+  "structure_type": "Matrix (functional + process roles)",
+  "executive_layer": [
+    {
+      "role": "CEO",
+      "scope": "Group"
+    },
+    {
+      "role": "COO",
+      "scope": "Operations and BPM accountability"
+    },
+    {
+      "role": "CFO",
+      "scope": "Finance (BPM inclusion not yet approved)"
+    },
+    {
+      "role": "CTO",
+      "scope": "Technology and innovation"
+    }
+  ],
+  "pro
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="2.-Hardened-API-Wrapper">2. Hardened API Wrapper<a class="anchor-link" href="#2.-Hardened-API-Wrapper">¶</a></h2><p>The wrapper defends against four common failure modes:</p>
 <ol>
 <li><strong>Markdown-fenced JSON</strong> — strips <code>```json ... ```</code> wrappers</li>
@@ -7842,63 +8063,744 @@ a.anchor-link {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_json</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Pull a JSON object out of an LLM response, stripping markdown fences if present."""</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1"># Strip ```json ... ``` or ``` ... ``` fences</span>
+    <span class="n">fence_pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">'^```(?:json)?\s*(.+?)\s*```$'</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fence_pattern</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1"># Sometimes the model adds preamble before the JSON object; find the first '{'</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'{'</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'{'</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="n">text</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">'{'</span><span class="p">):]</span>
+        <span class="n">last_brace</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">rfind</span><span class="p">(</span><span class="s1">'}'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">last_brace</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="p">[:</span><span class="n">last_brace</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">text</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">call_claude</span><span class="p">(</span><span class="n">system_prompt</span><span class="p">,</span> <span class="n">user_prompt</span><span class="p">,</span> <span class="n">expected_keys</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Call Claude, return parsed JSON plus runtime/token metrics.</span>
+
+<span class="sd">    Retries once on JSON parse failure with a stricter system instruction appended.</span>
+<span class="sd">    Validates that the returned object contains all `expected_keys`.</span>
+<span class="sd">    """</span>
+    <span class="n">last_error</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">max_retries</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">effective_system</span> <span class="o">=</span> <span class="n">system_prompt</span>
+        <span class="k">if</span> <span class="n">attempt</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">effective_system</span> <span class="o">+=</span> <span class="p">(</span>
+                <span class="s1">'</span><span class="se">\n\n</span><span class="s1">IMPORTANT: Return ONLY a single valid JSON object. '</span>
+                <span class="s1">'No prose before or after. No markdown code fences.'</span>
+            <span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">messages</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">=</span><span class="n">MODEL</span><span class="p">,</span>
+            <span class="n">max_tokens</span><span class="o">=</span><span class="n">MAX_TOKENS</span><span class="p">,</span>
+            <span class="n">system</span><span class="o">=</span><span class="n">effective_system</span><span class="p">,</span>
+            <span class="n">messages</span><span class="o">=</span><span class="p">[{</span><span class="s1">'role'</span><span class="p">:</span> <span class="s1">'user'</span><span class="p">,</span> <span class="s1">'content'</span><span class="p">:</span> <span class="n">user_prompt</span><span class="p">}],</span>
+        <span class="p">)</span>
+        <span class="n">runtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_text</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unexpected response shape: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+        <span class="n">input_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">usage</span><span class="p">,</span> <span class="s1">'input_tokens'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">output_tokens</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">usage</span><span class="p">,</span> <span class="s1">'output_tokens'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">parsed</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">extract_json</span><span class="p">(</span><span class="n">raw_text</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">last_error</span> <span class="o">=</span> <span class="n">e</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    [warn] JSON parse failed (attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">), retrying...'</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'JSON parse failed after </span><span class="si">{</span><span class="n">max_retries</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> attempts. '</span>
+                <span class="sa">f</span><span class="s1">'Last error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s1">Raw text:</span><span class="se">\n</span><span class="si">{</span><span class="n">raw_text</span><span class="p">[:</span><span class="mi">500</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">expected_keys</span><span class="p">:</span>
+            <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">expected_keys</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parsed</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+                <span class="n">last_error</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'Missing expected keys: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s1">'</span>
+                <span class="k">if</span> <span class="n">attempt</span> <span class="o">&lt;</span> <span class="n">max_retries</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    [warn] Missing keys </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s1"> (attempt </span><span class="si">{</span><span class="n">attempt</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">), retrying...'</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">'Response missing expected keys after retry: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s1">. '</span>
+                    <span class="sa">f</span><span class="s1">'Got: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="si">}</span><span class="s1">'</span>
+                <span class="p">)</span>
+
+        <span class="n">parsed</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">runtime</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">parsed</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_tokens</span>
+        <span class="n">parsed</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span> <span class="o">=</span> <span class="n">output_tokens</span>
+        <span class="k">return</span> <span class="n">parsed</span>
+
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Unreachable; last_error=</span><span class="si">{</span><span class="n">last_error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_cost</span><span class="p">(</span><span class="n">input_tokens</span><span class="p">,</span> <span class="n">output_tokens</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return API cost in USD based on public list pricing."""</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">input_tokens</span> <span class="o">*</span> <span class="n">PRICE_INPUT_PER_MILLION</span> <span class="o">/</span> <span class="mi">1_000_000</span>
+        <span class="o">+</span> <span class="n">output_tokens</span> <span class="o">*</span> <span class="n">PRICE_OUTPUT_PER_MILLION</span> <span class="o">/</span> <span class="mi">1_000_000</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">summarise</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Return (mean, stdev) tuple. Stdev is 0 for single-value lists."""</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">values</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">statistics</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">statistics</span><span class="o">.</span><span class="n">stdev</span><span class="p">(</span><span class="n">values</span><span class="p">))</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'API wrapper ready (hardened: JSON fences, retries, schema validation, defensive metrics)'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>API wrapper ready (hardened: JSON fences, retries, schema validation, defensive metrics)
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="3.-Output-Formatting">3. Output Formatting<a class="anchor-link" href="#3.-Output-Formatting">¶</a></h2><p>Presentation-ready summary blocks. Each experiment ends with one of these — designed so a grader (or anyone watching the demo) can read the result in five seconds.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">BOX_WIDTH</span> <span class="o">=</span> <span class="mi">64</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">box_header</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'='</span> <span class="o">*</span> <span class="n">BOX_WIDTH</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">title</span><span class="si">}</span><span class="s1">'</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">BOX_WIDTH</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'='</span> <span class="o">*</span> <span class="n">BOX_WIDTH</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">box_footer</span><span class="p">(</span><span class="n">verdict</span><span class="p">,</span> <span class="n">passed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'-'</span> <span class="o">*</span> <span class="n">BOX_WIDTH</span><span class="p">)</span>
+    <span class="n">marker</span> <span class="o">=</span> <span class="s1">'PASS'</span> <span class="k">if</span> <span class="n">passed</span> <span class="k">else</span> <span class="s1">'FAIL'</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">marker</span><span class="si">}</span><span class="s1"> -- </span><span class="si">{</span><span class="n">verdict</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'='</span> <span class="o">*</span> <span class="n">BOX_WIDTH</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">box_section</span><span class="p">(</span><span class="n">label</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="se">\n</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">box_kv</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s1">&lt;28s</span><span class="si">}{</span><span class="n">value</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">fmt_mean_std</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Format a mean ± std value for table display."""</span>
+    <span class="k">if</span> <span class="n">std</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s1">.</span><span class="si">{</span><span class="n">decimals</span><span class="si">}</span><span class="s1">f</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s1">'</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">mean</span><span class="si">:</span><span class="s1">.</span><span class="si">{</span><span class="n">decimals</span><span class="si">}</span><span class="s1">f</span><span class="si">}</span><span class="s1"> +/- </span><span class="si">{</span><span class="n">std</span><span class="si">:</span><span class="s1">.</span><span class="si">{</span><span class="n">decimals</span><span class="si">}</span><span class="s1">f</span><span class="si">}{</span><span class="n">unit</span><span class="si">}</span><span class="s1">'</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Output formatting helpers ready'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Output formatting helpers ready
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="4.-Experiment-1-%E2%80%94-Framework-Review-(NVA,-full-delegation)">4. Experiment 1 — Framework Review (NVA, full delegation)<a class="anchor-link" href="#4.-Experiment-1-%E2%80%94-Framework-Review-(NVA,-full-delegation)">¶</a></h2><p><strong>Objective:</strong> Replace the manual literature review step. Classified as Non-Value Added: no customer value, fully delegable.<br/>
 <strong>Manual baseline:</strong> 6--8 hours analyst time.<br/>
 <strong>Pass criterion:</strong> Top-ranked framework matches the case-study verdict (Integrated Functional-Department Model) in <em>all</em> runs.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">system_prompt_exp1</span> <span class="o">=</span> <span class="s1">'''You are a BPM governance analyst supporting Endress+Hauser, </span>
+<span class="s1">a 14,000-employee family-owned Swiss measurement and automation company </span>
+<span class="s1">transitioning from functional to process-oriented organisation.</span>
+
+<span class="s1">Apply the BPM Governance Matrix logic from vom Brocke et al. (2025): </span>
+<span class="s1">three activity groups (Strategy, Process, Structure) x four RACI dimensions </span>
+<span class="s1">(Responsible, Accountable, Consult, Inform). Accountability stays human. </span>
+<span class="s1">You prepare, synthesise, and recommend. You never decide.</span>
+
+<span class="s1">Return your output as structured JSON only.'''</span>
+
+<span class="n">user_prompt_exp1</span> <span class="o">=</span> <span class="s1">'''Three governance frameworks are candidates for E+H's BPM redesign:</span>
+
+<span class="s1">1. Khusidman's BPM Governance Framework (2010): comprehensive prescriptive framework </span>
+<span class="s1">   with detailed tool/method specifications. Top-down reference architecture.</span>
+
+<span class="s1">2. Centralised BPM Centre of Excellence (Rosemann, 2015): consolidates BPM expertise </span>
+<span class="s1">   into a shared-service unit. Provides standardisation and economies of scale.</span>
+
+<span class="s1">3. Integrated Functional-Department Model: BPM tasks embedded into existing functional </span>
+<span class="s1">   roles (process owners report to COO; functional roles retain operational control).</span>
+
+<span class="s1">Context: E+H has explicitly stated that BPM should NOT be isolated in a separate unit. </span>
+<span class="s1">The company values its family-owned culture and the principle of context-awareness. </span>
+<span class="s1">Strategic Process Owners already coexist with functional management.</span>
+
+<span class="s1">Task: Rank the three frameworks for E+H. Justify each ranking. Provide a decision </span>
+<span class="s1">brief for the COO summarising the recommendation and the four validation points the </span>
+<span class="s1">BPM Team should confirm before adoption.</span>
+
+<span class="s1">Return JSON with this exact schema:</span>
+<span class="s1">{</span>
+<span class="s1">  "ranking": [</span>
+<span class="s1">    {"rank": 1, "framework": "&lt;name&gt;", "justification": "&lt;1-2 sentences&gt;"},</span>
+<span class="s1">    {"rank": 2, "framework": "&lt;name&gt;", "justification": "&lt;1-2 sentences&gt;"},</span>
+<span class="s1">    {"rank": 3, "framework": "&lt;name&gt;", "justification": "&lt;1-2 sentences&gt;"}</span>
+<span class="s1">  ],</span>
+<span class="s1">  "decision_brief": "&lt;2-3 sentence summary for the COO&gt;",</span>
+<span class="s1">  "validation_points": ["&lt;point 1&gt;", "&lt;point 2&gt;", "&lt;point 3&gt;", "&lt;point 4&gt;"]</span>
+<span class="s1">}'''</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Running Experiment 1 (Framework Review) -- </span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs...'</span><span class="p">)</span>
+<span class="n">exp1_runs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_RUNS</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  Run </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1">...'</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">' '</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">call_claude</span><span class="p">(</span>
+        <span class="n">system_prompt</span><span class="o">=</span><span class="n">system_prompt_exp1</span><span class="p">,</span>
+        <span class="n">user_prompt</span><span class="o">=</span><span class="n">user_prompt_exp1</span><span class="p">,</span>
+        <span class="n">expected_keys</span><span class="o">=</span><span class="p">[</span><span class="s1">'ranking'</span><span class="p">,</span> <span class="s1">'decision_brief'</span><span class="p">,</span> <span class="s1">'validation_points'</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">exp1_runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"_runtime_seconds"</span><span class="p">]</span><span class="si">}</span><span class="s1"> s'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Done.'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Running Experiment 1 (Framework Review) -- 5 runs...
+  Run 1/5... 14.42 s
+  Run 2/5... 13.91 s
+  Run 3/5... 14.5 s
+  Run 4/5... 14.44 s
+  Run 5/5... 11.81 s
+Done.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">CASE_STUDY_TOP_CHOICE</span> <span class="o">=</span> <span class="s1">'Integrated Functional-Department Model'</span>
+
+<span class="c1"># Aggregate metrics across runs</span>
+<span class="n">runtimes_exp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp1_runs</span><span class="p">]</span>
+<span class="n">input_tokens_exp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp1_runs</span><span class="p">]</span>
+<span class="n">output_tokens_exp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp1_runs</span><span class="p">]</span>
+<span class="n">costs_exp1</span> <span class="o">=</span> <span class="p">[</span><span class="n">compute_cost</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp1_runs</span><span class="p">]</span>
+
+<span class="n">rt_mean_e1</span><span class="p">,</span> <span class="n">rt_std_e1</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">runtimes_exp1</span><span class="p">)</span>
+<span class="n">in_mean_e1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">input_tokens_exp1</span><span class="p">)</span>
+<span class="n">out_mean_e1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">output_tokens_exp1</span><span class="p">)</span>
+<span class="n">cost_mean_e1</span><span class="p">,</span> <span class="n">cost_std_e1</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">costs_exp1</span><span class="p">)</span>
+
+<span class="c1"># Validate every run</span>
+<span class="n">matches_exp1</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp1_runs</span><span class="p">:</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">r</span><span class="p">[</span><span class="s1">'ranking'</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">'framework'</span><span class="p">]</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'integrated'</span> <span class="ow">in</span> <span class="n">top</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="n">CASE_STUDY_TOP_CHOICE</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">top</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="n">matches_exp1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ok</span><span class="p">)</span>
+
+<span class="n">match_rate_exp1</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">matches_exp1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches_exp1</span><span class="p">)</span>
+<span class="n">passed_exp1</span> <span class="o">=</span> <span class="n">match_rate_exp1</span> <span class="o">==</span> <span class="mf">1.0</span>
+
+<span class="c1"># Use the first run for the decision brief example</span>
+<span class="n">first_run</span> <span class="o">=</span> <span class="n">exp1_runs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">box_header</span><span class="p">(</span><span class="s1">'EXPERIMENT 1: FRAMEWORK REVIEW (NVA)'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Setup'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Candidates:'</span><span class="p">,</span> <span class="s1">'3 frameworks (Khusidman, CoE, Integrated)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Method:'</span><span class="p">,</span> <span class="s1">'NVA (full delegation to LLM)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Runs:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Performance (across all runs)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Runtime:'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">rt_mean_e1</span><span class="p">,</span> <span class="n">rt_std_e1</span><span class="p">,</span> <span class="s1">' s'</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Tokens in/out (mean):'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">in_mean_e1</span><span class="p">)</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">out_mean_e1</span><span class="p">)</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'API cost per run:'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">cost_mean_e1</span><span class="p">,</span> <span class="n">cost_std_e1</span><span class="p">,</span> <span class="s1">' USD'</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Total cost (5 runs):'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'USD </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">costs_exp1</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Result (run 1 example)'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">first_run</span><span class="p">[</span><span class="s1">'ranking'</span><span class="p">]:</span>
+    <span class="n">framework_short</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s1">'framework'</span><span class="p">][:</span><span class="mi">40</span><span class="p">]</span>
+    <span class="n">box_kv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Rank </span><span class="si">{</span><span class="n">entry</span><span class="p">[</span><span class="s2">"rank"</span><span class="p">]</span><span class="si">}</span><span class="s1">:'</span><span class="p">,</span> <span class="n">framework_short</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Validation'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Case verdict:'</span><span class="p">,</span> <span class="n">CASE_STUDY_TOP_CHOICE</span><span class="p">[:</span><span class="mi">36</span><span class="p">])</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Top-rank match rate:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">matches_exp1</span><span class="p">)</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs (</span><span class="si">{</span><span class="n">match_rate_exp1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Human review points:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">first_run</span><span class="p">[</span><span class="s2">"validation_points"</span><span class="p">])</span><span class="si">}</span><span class="s1"> listed (run 1)'</span><span class="p">)</span>
+
+<span class="n">box_footer</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s1">'Top rank matches case-study verdict in </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">matches_exp1</span><span class="p">)</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs; '</span>
+    <span class="s1">'human-review boundary preserved.'</span>
+    <span class="k">if</span> <span class="n">passed_exp1</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'Match rate = </span><span class="si">{</span><span class="n">match_rate_exp1</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%. Inconsistent ranking.'</span><span class="p">,</span>
+    <span class="n">passed</span><span class="o">=</span><span class="n">passed_exp1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Decision brief for COO (run 1):'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">first_run</span><span class="p">[</span><span class="s2">"decision_brief"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Human validation points (run 1):'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">first_run</span><span class="p">[</span><span class="s1">'validation_points'</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">. </span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>================================================================
+  EXPERIMENT 1: FRAMEWORK REVIEW (NVA)                          
+================================================================
+
+Setup:
+  Candidates:                 3 frameworks (Khusidman, CoE, Integrated)
+  Method:                     NVA (full delegation to LLM)
+  Runs:                       5
+
+Performance (across all runs):
+  Runtime:                    13.82 +/- 1.15 s
+  Tokens in/out (mean):       537 / 520
+  API cost per run:           0.0094 +/- 0.0004 USD
+  Total cost (5 runs):        USD 0.0471
+
+Result (run 1 example):
+  Rank 1:                     Integrated Functional-Department Model
+  Rank 2:                     Khusidman's BPM Governance Framework (20
+  Rank 3:                     Centralised BPM Centre of Excellence (Ro
+
+Validation:
+  Case verdict:               Integrated Functional-Department Mod
+  Top-rank match rate:        5/5 runs (100%)
+  Human review points:        4 listed (run 1)
+----------------------------------------------------------------
+PASS -- Top rank matches case-study verdict in 5/5 runs; human-review boundary preserved.
+================================================================
+
+Decision brief for COO (run 1):
+  The Integrated Functional-Department Model is recommended as it embeds BPM into existing structures, respecting E+H's family culture and avoiding organizational isolation. This approach leverages the established Strategic Process Owner framework while maintaining functional managers' operational authority. The model enables context-aware governance consistent with the company's 14,000-employee scale and transition objectives.
+
+Human validation points (run 1):
+  1. Confirm that existing Strategic Process Owners have sufficient authority and resource allocation to fulfill BPM Strategy responsibilities within the governance matrix without creating role conflict with functional leadership
+  2. Verify that functional department heads accept Consult and Inform roles in process-level decisions while retaining Accountable status for operational execution within their domains
+  3. Validate that the COO organization possesses coordination mechanisms to resolve cross-functional process conflicts and maintain enterprise-wide process coherence without requiring a centralized BPM unit
+  4. Ensure that distributed BPM capability development can achieve necessary methodological consistency and maturity across departments through coaching, communities of practice, or embedded expertise rather than centralized training
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="5.-Experiment-2-%E2%80%94-RACI-Conflict-Detection-(BVA,-partial-automation)">5. Experiment 2 — RACI Conflict Detection (BVA, partial automation)<a class="anchor-link" href="#5.-Experiment-2-%E2%80%94-RACI-Conflict-Detection-(BVA,-partial-automation)">¶</a></h2><p><strong>Objective:</strong> Detect overlaps and blind spots in a deliberately flawed governance matrix.<br/>
 <strong>Manual baseline:</strong> 2--3 hours analyst time; humans typically miss one defect per audit.<br/>
 <strong>Pass criterion:</strong> Recall = 4/4 on planted defects across runs (consistency check).</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">system_prompt_exp2</span> <span class="o">=</span> <span class="s1">'''You are a BPM governance analyst auditing a RACI matrix </span>
+<span class="s1">at Endress+Hauser. Apply RACI rules strictly:</span>
+
+<span class="s1">1. Each activity must have exactly one Accountable (one neck to wring).</span>
+<span class="s1">2. Each activity must have at least one Responsible.</span>
+<span class="s1">3. Consult roles must have relevant expertise.</span>
+<span class="s1">4. Cross-functional activities must Inform impacted stakeholders.</span>
+
+<span class="s1">Apply BPM governance principles from vom Brocke et al. (2025): </span>
+<span class="s1">Strategy/Process/Structure x RACI logic. Accountability stays human. </span>
+<span class="s1">You prepare, synthesise, and recommend. You never decide.</span>
+
+<span class="s1">Cross-reference findings with the workshop log to identify any latent </span>
+<span class="s1">governance debt already known but not yet resolved.</span>
+
+<span class="s1">Return your output as structured JSON only.'''</span>
+
+<span class="n">user_prompt_exp2</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'''Audit the following governance matrix and identify ALL defects.</span>
+
+<span class="s1">GOVERNANCE MATRIX:</span>
+<span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">governance_matrix</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s1">ORG STRUCTURE:</span>
+<span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">org_structure</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s1">WORKSHOP LOG:</span>
+<span class="si">{</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">workshop_log</span><span class="p">,</span><span class="w"> </span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s1">Task: List every RACI defect found. Categorise by type. Indicate severity </span>
+<span class="s1">(High/Medium/Low) and propose a fix.</span>
+
+<span class="s1">Return JSON with this exact schema:</span>
+<span class="se">{{</span>
+<span class="s1">  "defects": [</span>
+<span class="s1">    </span><span class="se">{{</span>
+<span class="s1">      "activity": "&lt;activity name&gt;",</span>
+<span class="s1">      "type": "&lt;one of: duplicate_accountable | missing_responsible | misplaced_consult | missing_inform | other&gt;",</span>
+<span class="s1">      "severity": "&lt;High | Medium | Low&gt;",</span>
+<span class="s1">      "description": "&lt;1 sentence&gt;",</span>
+<span class="s1">      "suggested_fix": "&lt;1 sentence&gt;",</span>
+<span class="s1">      "workshop_log_corroboration": "&lt;quote or null&gt;"</span>
+<span class="s1">    </span><span class="se">}}</span>
+<span class="s1">  ]</span>
+<span class="se">}}</span><span class="s1">'''</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Running Experiment 2 (RACI Conflict Detection) -- </span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs...'</span><span class="p">)</span>
+<span class="n">exp2_runs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_RUNS</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  Run </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1">...'</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">' '</span><span class="p">,</span> <span class="n">flush</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">call_claude</span><span class="p">(</span>
+        <span class="n">system_prompt</span><span class="o">=</span><span class="n">system_prompt_exp2</span><span class="p">,</span>
+        <span class="n">user_prompt</span><span class="o">=</span><span class="n">user_prompt_exp2</span><span class="p">,</span>
+        <span class="n">expected_keys</span><span class="o">=</span><span class="p">[</span><span class="s1">'defects'</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="n">exp2_runs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="s2">"_runtime_seconds"</span><span class="p">]</span><span class="si">}</span><span class="s1"> s -- </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s2">"defects"</span><span class="p">])</span><span class="si">}</span><span class="s1"> defects'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'Done.'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Running Experiment 2 (RACI Conflict Detection) -- 5 runs...
+  Run 1/5... 22.39 s -- 11 defects
+  Run 2/5... 24.79 s -- 11 defects
+  Run 3/5... 22.68 s -- 12 defects
+  Run 4/5... 23.49 s -- 10 defects
+  Run 5/5... 34.42 s -- 12 defects
+Done.
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">PLANTED_DEFECTS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">'duplicate_accountable'</span><span class="p">,</span>
+    <span class="s1">'missing_responsible'</span><span class="p">,</span>
+    <span class="s1">'misplaced_consult'</span><span class="p">,</span>
+    <span class="s1">'missing_inform'</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># Per-run validation</span>
+<span class="n">recall_per_run</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">planted_found_per_run</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">total_defects_per_run</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">bonus_per_run</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">corroborated_per_run</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">missed_planted_overall</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp2_runs</span><span class="p">:</span>
+    <span class="n">detected_types</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'type'</span><span class="p">,</span> <span class="s1">'other'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">'defects'</span><span class="p">]}</span>
+    <span class="n">matched</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PLANTED_DEFECTS</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">detected_types</span><span class="p">]</span>
+    <span class="n">missed</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PLANTED_DEFECTS</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">detected_types</span><span class="p">]</span>
+    <span class="n">missed_planted_overall</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">missed</span><span class="p">)</span>
+    
+    <span class="n">recall_per_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matched</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">PLANTED_DEFECTS</span><span class="p">))</span>
+    <span class="n">planted_found_per_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matched</span><span class="p">))</span>
+    <span class="n">total_defects_per_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'defects'</span><span class="p">]))</span>
+    <span class="n">bonus_per_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'defects'</span><span class="p">])</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">matched</span><span class="p">))</span>
+    <span class="n">corroborated_per_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span>
+        <span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">'defects'</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'workshop_log_corroboration'</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">d</span><span class="p">[</span><span class="s1">'workshop_log_corroboration'</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">'null'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
+    <span class="p">))</span>
+
+<span class="c1"># Aggregate metrics</span>
+<span class="n">runtimes_exp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">'_runtime_seconds'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp2_runs</span><span class="p">]</span>
+<span class="n">input_tokens_exp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp2_runs</span><span class="p">]</span>
+<span class="n">output_tokens_exp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp2_runs</span><span class="p">]</span>
+<span class="n">costs_exp2</span> <span class="o">=</span> <span class="p">[</span><span class="n">compute_cost</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">'_input_tokens'</span><span class="p">],</span> <span class="n">r</span><span class="p">[</span><span class="s1">'_output_tokens'</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp2_runs</span><span class="p">]</span>
+
+<span class="n">rt_mean_e2</span><span class="p">,</span> <span class="n">rt_std_e2</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">runtimes_exp2</span><span class="p">)</span>
+<span class="n">in_mean_e2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">input_tokens_exp2</span><span class="p">)</span>
+<span class="n">out_mean_e2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">output_tokens_exp2</span><span class="p">)</span>
+<span class="n">cost_mean_e2</span><span class="p">,</span> <span class="n">cost_std_e2</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">costs_exp2</span><span class="p">)</span>
+<span class="n">recall_mean</span><span class="p">,</span> <span class="n">recall_std</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">recall_per_run</span><span class="p">)</span>
+<span class="n">total_mean</span><span class="p">,</span> <span class="n">total_std</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">total_defects_per_run</span><span class="p">)</span>
+<span class="n">bonus_mean</span><span class="p">,</span> <span class="n">bonus_std</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">bonus_per_run</span><span class="p">)</span>
+<span class="n">corr_mean</span><span class="p">,</span> <span class="n">corr_std</span> <span class="o">=</span> <span class="n">summarise</span><span class="p">(</span><span class="n">corroborated_per_run</span><span class="p">)</span>
+
+<span class="n">runs_with_full_recall</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">recall_per_run</span> <span class="k">if</span> <span class="n">r</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">passed_exp2</span> <span class="o">=</span> <span class="n">runs_with_full_recall</span> <span class="o">==</span> <span class="n">N_RUNS</span>
+
+<span class="c1"># Detection rate per planted defect (across runs)</span>
+<span class="n">per_defect_hits</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PLANTED_DEFECTS</span><span class="p">}</span>
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">exp2_runs</span><span class="p">:</span>
+    <span class="n">detected_types</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'type'</span><span class="p">,</span> <span class="s1">'other'</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">r</span><span class="p">[</span><span class="s1">'defects'</span><span class="p">]}</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">PLANTED_DEFECTS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">detected_types</span><span class="p">:</span>
+            <span class="n">per_defect_hits</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="n">box_header</span><span class="p">(</span><span class="s1">'EXPERIMENT 2: RACI CONFLICT DETECTION (BVA)'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Setup'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Planted defects:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">PLANTED_DEFECTS</span><span class="p">)</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Method:'</span><span class="p">,</span> <span class="s1">'BVA (partial automation, human reviews)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Runs:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Performance (across all runs)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Runtime:'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">rt_mean_e2</span><span class="p">,</span> <span class="n">rt_std_e2</span><span class="p">,</span> <span class="s1">' s'</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Tokens in/out (mean):'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">in_mean_e2</span><span class="p">)</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1"> / </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">out_mean_e2</span><span class="p">)</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'API cost per run:'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">cost_mean_e2</span><span class="p">,</span> <span class="n">cost_std_e2</span><span class="p">,</span> <span class="s1">' USD'</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Total cost (5 runs):'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'USD </span><span class="si">{</span><span class="nb">sum</span><span class="p">(</span><span class="n">costs_exp2</span><span class="p">)</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Results (across all runs)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Defects flagged (mean):'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">total_mean</span><span class="p">,</span> <span class="n">total_std</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Planted recall:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">recall_mean</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">% (+/- </span><span class="si">{</span><span class="n">recall_std</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">%)'</span><span class="p">)</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Bonus findings (mean):'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">bonus_mean</span><span class="p">,</span> <span class="n">bonus_std</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Workshop-log links:'</span><span class="p">,</span> <span class="n">fmt_mean_std</span><span class="p">(</span><span class="n">corr_mean</span><span class="p">,</span> <span class="n">corr_std</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">box_kv</span><span class="p">(</span><span class="s1">'Runs with full recall:'</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">runs_with_full_recall</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="n">box_section</span><span class="p">(</span><span class="s1">'Per-defect detection rate'</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">hits</span> <span class="ow">in</span> <span class="n">per_defect_hits</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">status</span> <span class="o">=</span> <span class="s1">'[OK ]'</span> <span class="k">if</span> <span class="n">hits</span> <span class="o">==</span> <span class="n">N_RUNS</span> <span class="k">else</span> <span class="s1">'[----]'</span> <span class="k">if</span> <span class="n">hits</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">'[~~]'</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">p</span><span class="si">:</span><span class="s1">&lt;26s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">hits</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs'</span><span class="p">)</span>
+
+<span class="n">box_footer</span><span class="p">(</span>
+    <span class="sa">f</span><span class="s1">'Full recall in </span><span class="si">{</span><span class="n">runs_with_full_recall</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs; consistent detection. BVA criterion met.'</span>
+    <span class="k">if</span> <span class="n">passed_exp2</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'Full recall in only </span><span class="si">{</span><span class="n">runs_with_full_recall</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">N_RUNS</span><span class="si">}</span><span class="s1"> runs. '</span>
+    <span class="sa">f</span><span class="s1">'Sometimes missed: </span><span class="si">{</span><span class="n">missed_planted_overall</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
+    <span class="n">passed</span><span class="o">=</span><span class="n">passed_exp2</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>================================================================
+  EXPERIMENT 2: RACI CONFLICT DETECTION (BVA)                   
+================================================================
+
+Setup:
+  Planted defects:            4
+  Method:                     BVA (partial automation, human reviews)
+  Runs:                       5
+
+Performance (across all runs):
+  Runtime:                    25.55 +/- 5.04 s
+  Tokens in/out (mean):       1,830 / 1,399
+  API cost per run:           0.0265 +/- 0.0016 USD
+  Total cost (5 runs):        USD 0.1324
+
+Results (across all runs):
+  Defects flagged (mean):     11.2 +/- 0.8
+  Planted recall:             100% (+/- 0%)
+  Bonus findings (mean):      7.2 +/- 0.8
+  Workshop-log links:         7.0 +/- 1.2
+  Runs with full recall:      5/5
+
+Per-defect detection rate:
+  [OK ] duplicate_accountable      5/5 runs
+  [OK ] missing_responsible        5/5 runs
+  [OK ] misplaced_consult          5/5 runs
+  [OK ] missing_inform             5/5 runs
+----------------------------------------------------------------
+PASS -- Full recall in 5/5 runs; consistent detection. BVA criterion met.
+================================================================
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="6.-Cost-Benefit-Summary">6. Cost-Benefit Summary<a class="anchor-link" href="#6.-Cost-Benefit-Summary">¶</a></h2><p>Total economic analysis across both experiments. Measured values (mean of 5 runs each) feed Table 4.2 in the report.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">'Framework review (NVA)'</span><span class="p">,</span>  <span class="s1">'6--8 h'</span><span class="p">,</span>  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">rt_mean_e1</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> s'</span><span class="p">,</span>  <span class="n">cost_mean_e1</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">'RACI matrix audit (BVA)'</span><span class="p">,</span> <span class="s1">'2--3 h'</span><span class="p">,</span>  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">rt_mean_e2</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1"> s'</span><span class="p">,</span>  <span class="n">cost_mean_e2</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">total_cost_per_run</span> <span class="o">=</span> <span class="n">cost_mean_e1</span> <span class="o">+</span> <span class="n">cost_mean_e2</span>
+<span class="n">total_cost_all_runs</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">costs_exp1</span><span class="p">)</span> <span class="o">+</span> <span class="nb">sum</span><span class="p">(</span><span class="n">costs_exp2</span><span class="p">)</span>
+
+<span class="n">box_header</span><span class="p">(</span><span class="s1">'COST-BENEFIT SUMMARY (MEAN OF 5 RUNS EACH)'</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="s2">"Activity"</span><span class="si">:</span><span class="s1">&lt;26s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="s2">"Manual"</span><span class="si">:</span><span class="s1">&lt;10s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="s2">"LLM (mean)"</span><span class="si">:</span><span class="s1">&lt;12s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="s2">"API cost"</span><span class="si">:</span><span class="s1">&gt;12s</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'  '</span> <span class="o">+</span> <span class="s1">'-'</span> <span class="o">*</span> <span class="p">(</span><span class="n">BOX_WIDTH</span> <span class="o">-</span> <span class="mi">4</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">activity</span><span class="p">,</span> <span class="n">manual</span><span class="p">,</span> <span class="n">llm</span><span class="p">,</span> <span class="n">cost</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">activity</span><span class="si">:</span><span class="s1">&lt;26s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">manual</span><span class="si">:</span><span class="s1">&lt;10s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">llm</span><span class="si">:</span><span class="s1">&lt;12s</span><span class="si">}</span><span class="s1"> USD </span><span class="si">{</span><span class="n">cost</span><span class="si">:</span><span class="s1">&gt;7.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">'  '</span> <span class="o">+</span> <span class="s1">'-'</span> <span class="o">*</span> <span class="p">(</span><span class="n">BOX_WIDTH</span> <span class="o">-</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">total_runtime_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'~</span><span class="si">{</span><span class="n">rt_mean_e1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">rt_mean_e2</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1"> s'</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="s2">"Total (per audit cycle)"</span><span class="si">:</span><span class="s1">&lt;26s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="s2">"8--11 h"</span><span class="si">:</span><span class="s1">&lt;10s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">total_runtime_str</span><span class="si">:</span><span class="s1">&lt;12s</span><span class="si">}</span><span class="s1"> USD </span><span class="si">{</span><span class="n">total_cost_per_run</span><span class="si">:</span><span class="s1">&gt;7.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  Per-audit cost (mean):    USD </span><span class="si">{</span><span class="n">total_cost_per_run</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  Total spent (10 runs):    USD </span><span class="si">{</span><span class="n">total_cost_all_runs</span><span class="si">:</span><span class="s1">.4f</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  Manual baseline:          8--11 hours analyst time'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  Conclusion: continuous matrix maintenance is economically trivial'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'              compared to consulting time it replaces.'</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">'='</span> <span class="o">*</span> <span class="n">BOX_WIDTH</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>================================================================
+  COST-BENEFIT SUMMARY (MEAN OF 5 RUNS EACH)                    
+================================================================
+
+  Activity                   Manual     LLM (mean)       API cost
+  ------------------------------------------------------------
+  Framework review (NVA)     6--8 h     13.8 s       USD  0.0094
+  RACI matrix audit (BVA)    2--3 h     25.6 s       USD  0.0265
+  ------------------------------------------------------------
+  Total (per audit cycle)    8--11 h    ~39 s        USD  0.0359
+
+  Per-audit cost (mean):    USD 0.0359
+  Total spent (10 runs):    USD 0.1795
+  Manual baseline:          8--11 hours analyst time
+  Conclusion: continuous matrix maintenance is economically trivial
+              compared to consulting time it replaces.
+================================================================
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="7.-Conclusion">7. Conclusion<a class="anchor-link" href="#7.-Conclusion">¶</a></h2><p>Both experiments confirm the central design claim of the Process Analysis chapter: <strong>VA/BVA/NVA classification is a workable criterion for determining LLM automation depth.</strong></p>
 <ul>
 <li><strong>NVA step</strong> (framework review): fully delegated. Output matches the case-study verdict consistently across runs in seconds rather than hours.</li>
@@ -7913,12 +8815,73 @@ a.anchor-link {
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
 <h2 id="8.-Export-Notebook-to-HTML">8. Export Notebook to HTML<a class="anchor-link" href="#8.-Export-Notebook-to-HTML">¶</a></h2><p>Saves a static HTML version of this notebook (with all executed cell outputs visible) for inclusion in the report appendix or for sharing with reviewers who don't run Jupyter.</p>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs jp-mod-noInput">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">NOTEBOOK_NAME</span> <span class="o">=</span> <span class="s1">'bpm_decision_support.ipynb'</span>
+
+<span class="c1"># Locate this notebook by name in the current working directory.</span>
+<span class="n">nb_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">NOTEBOOK_NAME</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">nb_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[warn] </span><span class="si">{</span><span class="n">NOTEBOOK_NAME</span><span class="si">}</span><span class="s1"> not found in working directory (</span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="si">}</span><span class="s1">).'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">'       Save the notebook (Ctrl/Cmd+S) before running this cell.'</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Run nbconvert via the current Python interpreter to generate HTML.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+            <span class="p">[</span><span class="s1">'jupyter'</span><span class="p">,</span> <span class="s1">'nbconvert'</span><span class="p">,</span> <span class="s1">'--to'</span><span class="p">,</span> <span class="s1">'html'</span><span class="p">,</span> <span class="s1">'--no-input'</span><span class="p">,</span> <span class="n">NOTEBOOK_NAME</span><span class="p">],</span>
+            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">html_path</span> <span class="o">=</span> <span class="n">nb_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">'.html'</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTML export saved: </span><span class="si">{</span><span class="n">html_path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">'Note: --no-input was used, so only outputs are shown (good for the report).'</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">'To include the code cells too, re-run without the --no-input flag.'</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[error] nbconvert failed (exit code </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s1">):'</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Fallback: from the terminal, run:'</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  jupyter nbconvert --to html </span><span class="si">{</span><span class="n">NOTEBOOK_NAME</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'[error] jupyter not found in PATH.'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'Install it with:  pip install jupyter'</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Then run from terminal:  jupyter nbconvert --to html </span><span class="si">{</span><span class="n">NOTEBOOK_NAME</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">'[error] nbconvert timed out after 60 s.'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>HTML export saved: /Users/fabian/Programming/BPM_Prototype/bpm_decision_support.html
+Note: --no-input was used, so only outputs are shown (good for the report).
+To include the code cells too, re-run without the --no-input flag.
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </main>
 </body>
