@@ -7831,7 +7831,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -7839,6 +7839,7 @@ a.anchor-link {
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">statistics</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">anthropic</span>
@@ -7884,7 +7885,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the three retrieval sources (workshop log, governance matrix, org structure)</span>
@@ -7948,7 +7949,7 @@ org_structure:     13 roles in executive + functional layers
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [16]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s1">'workshop_log keys:     '</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">workshop_log</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
@@ -8068,7 +8069,7 @@ org_structure keys:     ['company', 'headquarters', 'employees', 'structure_type
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [17]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">extract_json</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
@@ -8203,7 +8204,7 @@ org_structure keys:     ['company', 'headquarters', 'employees', 'structure_type
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [18]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">BOX_WIDTH</span> <span class="o">=</span> <span class="mi">64</span>
@@ -8268,7 +8269,7 @@ org_structure keys:     ['company', 'headquarters', 'employees', 'structure_type
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [19]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">system_prompt_exp1</span> <span class="o">=</span> <span class="s1">'''You are a BPM governance analyst supporting Endress+Hauser, </span>
@@ -8337,11 +8338,11 @@ org_structure keys:     ['company', 'headquarters', 'employees', 'structure_type
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Running Experiment 1 (Framework Review) -- 5 runs...
-  Run 1/5... 14.42 s
-  Run 2/5... 13.91 s
-  Run 3/5... 14.5 s
-  Run 4/5... 14.44 s
-  Run 5/5... 11.81 s
+  Run 1/5... 14.99 s
+  Run 2/5... 13.82 s
+  Run 3/5... 14.34 s
+  Run 4/5... 12.59 s
+  Run 5/5... 13.73 s
 Done.
 </pre>
 </div>
@@ -8353,7 +8354,7 @@ Done.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [20]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">CASE_STUDY_TOP_CHOICE</span> <span class="o">=</span> <span class="s1">'Integrated Functional-Department Model'</span>
@@ -8412,11 +8413,25 @@ Done.
     <span class="n">passed</span><span class="o">=</span><span class="n">passed_exp1</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="c1"># Wrapped long-text sections for clean screenshot capture</span>
+<span class="n">WRAP_WIDTH</span> <span class="o">=</span> <span class="mi">64</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Decision brief for COO (run 1):'</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">first_run</span><span class="p">[</span><span class="s2">"decision_brief"</span><span class="p">]</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+    <span class="n">first_run</span><span class="p">[</span><span class="s1">'decision_brief'</span><span class="p">],</span>
+    <span class="n">width</span><span class="o">=</span><span class="n">WRAP_WIDTH</span><span class="p">,</span>
+    <span class="n">initial_indent</span><span class="o">=</span><span class="s1">'  '</span><span class="p">,</span>
+    <span class="n">subsequent_indent</span><span class="o">=</span><span class="s1">'  '</span><span class="p">,</span>
+<span class="p">))</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Human validation points (run 1):'</span><span class="p">)</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">first_run</span><span class="p">[</span><span class="s1">'validation_points'</span><span class="p">],</span> <span class="mi">1</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">. </span><span class="si">{</span><span class="n">point</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span>
+        <span class="n">point</span><span class="p">,</span>
+        <span class="n">width</span><span class="o">=</span><span class="n">WRAP_WIDTH</span><span class="p">,</span>
+        <span class="n">initial_indent</span><span class="o">=</span><span class="sa">f</span><span class="s1">'  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">. '</span><span class="p">,</span>
+        <span class="n">subsequent_indent</span><span class="o">=</span><span class="s1">'     '</span><span class="p">,</span>
+    <span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -8439,10 +8454,10 @@ Setup:
   Runs:                       5
 
 Performance (across all runs):
-  Runtime:                    13.82 +/- 1.15 s
-  Tokens in/out (mean):       537 / 520
-  API cost per run:           0.0094 +/- 0.0004 USD
-  Total cost (5 runs):        USD 0.0471
+  Runtime:                    13.89 +/- 0.89 s
+  Tokens in/out (mean):       537 / 546
+  API cost per run:           0.0098 +/- 0.0004 USD
+  Total cost (5 runs):        USD 0.0490
 
 Result (run 1 example):
   Rank 1:                     Integrated Functional-Department Model
@@ -8458,13 +8473,34 @@ PASS -- Top rank matches case-study verdict in 5/5 runs; human-review boundary p
 ================================================================
 
 Decision brief for COO (run 1):
-  The Integrated Functional-Department Model is recommended as it embeds BPM into existing structures, respecting E+H's family culture and avoiding organizational isolation. This approach leverages the established Strategic Process Owner framework while maintaining functional managers' operational authority. The model enables context-aware governance consistent with the company's 14,000-employee scale and transition objectives.
+  The Integrated Functional-Department Model is recommended as
+  it satisfies E+H's non-negotiable constraint against BPM
+  isolation, leverages the existing Strategic Process Owner-COO
+  structure, and embeds process governance within operational
+  line accountability. This approach honours the family culture,
+  preserves context-awareness across diverse measurement and
+  automation domains, and enables the BPM Governance Matrix
+  (Strategy-Process-Structure × RACI) to operate through
+  existing roles rather than creating parallel structures.
 
 Human validation points (run 1):
-  1. Confirm that existing Strategic Process Owners have sufficient authority and resource allocation to fulfill BPM Strategy responsibilities within the governance matrix without creating role conflict with functional leadership
-  2. Verify that functional department heads accept Consult and Inform roles in process-level decisions while retaining Accountable status for operational execution within their domains
-  3. Validate that the COO organization possesses coordination mechanisms to resolve cross-functional process conflicts and maintain enterprise-wide process coherence without requiring a centralized BPM unit
-  4. Ensure that distributed BPM capability development can achieve necessary methodological consistency and maturity across departments through coaching, communities of practice, or embedded expertise rather than centralized training
+  1. Confirm that all nine BPM Governance Matrix cells
+     (Strategy/Process/Structure ×
+     Responsible/Accountable/Consult/Inform) can be populated
+     using existing or minimally-extended functional roles
+     without requiring a standalone BPM unit
+  2. Verify that Strategic Process Owners possess sufficient
+     authority and decision rights under COO mandate to resolve
+     cross-functional conflicts without escalating every
+     interface issue to executive level
+  3. Validate that functional department heads accept shared
+     accountability for end-to-end process performance metrics
+     alongside their traditional functional KPIs, ensuring no
+     accountability gaps emerge at process boundaries
+  4. Assess whether current IT infrastructure and process
+     management tooling can support distributed process
+     governance (process modeling, monitoring, improvement
+     tracking) without requiring centralised CoE administration
 </pre>
 </div>
 </div>
@@ -8488,7 +8524,7 @@ Human validation points (run 1):
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [21]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">system_prompt_exp2</span> <span class="o">=</span> <span class="s1">'''You are a BPM governance analyst auditing a RACI matrix </span>
@@ -8561,11 +8597,11 @@ Human validation points (run 1):
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>Running Experiment 2 (RACI Conflict Detection) -- 5 runs...
-  Run 1/5... 22.39 s -- 11 defects
-  Run 2/5... 24.79 s -- 11 defects
-  Run 3/5... 22.68 s -- 12 defects
-  Run 4/5... 23.49 s -- 10 defects
-  Run 5/5... 34.42 s -- 12 defects
+  Run 1/5... 22.18 s -- 11 defects
+  Run 2/5... 21.9 s -- 11 defects
+  Run 3/5... 23.41 s -- 12 defects
+  Run 4/5... 19.08 s -- 10 defects
+  Run 5/5... 23.89 s -- 12 defects
 Done.
 </pre>
 </div>
@@ -8577,7 +8613,7 @@ Done.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [22]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">PLANTED_DEFECTS</span> <span class="o">=</span> <span class="p">[</span>
@@ -8690,16 +8726,16 @@ Setup:
   Runs:                       5
 
 Performance (across all runs):
-  Runtime:                    25.55 +/- 5.04 s
-  Tokens in/out (mean):       1,830 / 1,399
-  API cost per run:           0.0265 +/- 0.0016 USD
-  Total cost (5 runs):        USD 0.1324
+  Runtime:                    22.09 +/- 1.88 s
+  Tokens in/out (mean):       1,830 / 1,358
+  API cost per run:           0.0259 +/- 0.0015 USD
+  Total cost (5 runs):        USD 0.1293
 
 Results (across all runs):
   Defects flagged (mean):     11.2 +/- 0.8
   Planted recall:             100% (+/- 0%)
   Bonus findings (mean):      7.2 +/- 0.8
-  Workshop-log links:         7.0 +/- 1.2
+  Workshop-log links:         7.0 +/- 1.0
   Runs with full recall:      5/5
 
 Per-defect detection rate:
@@ -8731,7 +8767,7 @@ PASS -- Full recall in 5/5 runs; consistent detection. BVA criterion met.
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [23]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">rows</span> <span class="o">=</span> <span class="p">[</span>
@@ -8778,13 +8814,13 @@ PASS -- Full recall in 5/5 runs; consistent detection. BVA criterion met.
 
   Activity                   Manual     LLM (mean)       API cost
   ------------------------------------------------------------
-  Framework review (NVA)     6--8 h     13.8 s       USD  0.0094
-  RACI matrix audit (BVA)    2--3 h     25.6 s       USD  0.0265
+  Framework review (NVA)     6--8 h     13.9 s       USD  0.0098
+  RACI matrix audit (BVA)    2--3 h     22.1 s       USD  0.0259
   ------------------------------------------------------------
-  Total (per audit cycle)    8--11 h    ~39 s        USD  0.0359
+  Total (per audit cycle)    8--11 h    ~36 s        USD  0.0357
 
-  Per-audit cost (mean):    USD 0.0359
-  Total spent (10 runs):    USD 0.1795
+  Per-audit cost (mean):    USD 0.0357
+  Total spent (10 runs):    USD 0.1783
   Manual baseline:          8--11 hours analyst time
   Conclusion: continuous matrix maintenance is economically trivial
               compared to consulting time it replaces.
@@ -8807,78 +8843,6 @@ PASS -- Full recall in 5/5 runs; consistent detection. BVA criterion met.
 <li><strong>BVA step</strong> (matrix audit): detects all planted defects, surfaces latent governance debt from the workshop log, and preserves the human <em>Accountable</em> review step.</li>
 </ul>
 <p>API cost remains below USD 0.10 per request, supporting the cost-benefit case for continuous matrix maintenance — the "living document" the original case study called for (vom Brocke et al., 2025, p. 235).</p>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="8.-Export-Notebook-to-HTML">8. Export Notebook to HTML<a class="anchor-link" href="#8.-Export-Notebook-to-HTML">¶</a></h2><p>Saves a static HTML version of this notebook (with all executed cell outputs visible) for inclusion in the report appendix or for sharing with reviewers who don't run Jupyter.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-
-<span class="n">NOTEBOOK_NAME</span> <span class="o">=</span> <span class="s1">'bpm_decision_support.ipynb'</span>
-
-<span class="c1"># Locate this notebook by name in the current working directory.</span>
-<span class="n">nb_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">NOTEBOOK_NAME</span><span class="p">)</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">nb_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[warn] </span><span class="si">{</span><span class="n">NOTEBOOK_NAME</span><span class="si">}</span><span class="s1"> not found in working directory (</span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span><span class="si">}</span><span class="s1">).'</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">'       Save the notebook (Ctrl/Cmd+S) before running this cell.'</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="c1"># Run nbconvert via the current Python interpreter to generate HTML.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-            <span class="p">[</span><span class="s1">'jupyter'</span><span class="p">,</span> <span class="s1">'nbconvert'</span><span class="p">,</span> <span class="s1">'--to'</span><span class="p">,</span> <span class="s1">'html'</span><span class="p">,</span> <span class="s1">'--no-input'</span><span class="p">,</span> <span class="n">NOTEBOOK_NAME</span><span class="p">],</span>
-            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">html_path</span> <span class="o">=</span> <span class="n">nb_path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">'.html'</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTML export saved: </span><span class="si">{</span><span class="n">html_path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">'Note: --no-input was used, so only outputs are shown (good for the report).'</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">'To include the code cells too, re-run without the --no-input flag.'</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'[error] nbconvert failed (exit code </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s1">):'</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s1">'</span><span class="se">\n</span><span class="s1">Fallback: from the terminal, run:'</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'  jupyter nbconvert --to html </span><span class="si">{</span><span class="n">NOTEBOOK_NAME</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">'[error] jupyter not found in PATH.'</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">'Install it with:  pip install jupyter'</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Then run from terminal:  jupyter nbconvert --to html </span><span class="si">{</span><span class="n">NOTEBOOK_NAME</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">'[error] nbconvert timed out after 60 s.'</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>HTML export saved: /Users/fabian/Programming/BPM_Prototype/bpm_decision_support.html
-Note: --no-input was used, so only outputs are shown (good for the report).
-To include the code cells too, re-run without the --no-input flag.
-</pre>
-</div>
 </div>
 </div>
 </div>
